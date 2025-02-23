@@ -43,7 +43,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(
     chalk.yellow.bold(
-      `\n 🚀 Server running on: ${chalk.cyan(`http://localhost:${PORT}`)}`
+      `\n 🚀 Server running on: ${chalk.cyan(`https://salonbackend-yfwp.onrender.com/`)}`
     )
   );
 });
