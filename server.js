@@ -7,7 +7,10 @@ const chalk = require('chalk');
 // Import Routes
 const adminAuthRoutes = require('./routes/authRoutes');
 const salonAdminRoutes = require('./routes/salonAdminRoutes');
-// const employeeRoutes = require('./routes/employeeRoutes');
+const customerRoutes = require('./routes/customerRoutes');
+const employeeRoutes = require('./routes/employeeRoutes');
+const branchRoutes = require('./routes/branchRoutes')
+const bookingRoutes = require('./routes/bookingRoutes');
 
 // Initialize environment variables
 dotenv.config();
@@ -25,9 +28,11 @@ app.use(express.json()); // JSON Parsing
 // Routes
 app.use('/api/auth', adminAuthRoutes);
 app.use('/api/salon-admin', salonAdminRoutes);
-// app.use('/api/employee', employeeRoutes);
+app.use('/api/customer', customerRoutes);
+app.use('/api/employee', employeeRoutes);
+app.use('/api/branch',branchRoutes)
+// app.use('/api/booking', bookingRoutes);
 
-// Global Error Handler Middleware
 app.use((err, req, res, next) => {
   console.error(chalk.red.bold(`❌ Error: ${err.message}`));
   res.status(err.status || 500).json({
@@ -43,7 +48,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(
     chalk.yellow.bold(
-      `\n 🚀 Server running on: ${chalk.cyan(`https://salonbackend-yfwp.onrender.com/`)}`
+      `\n 🚀 Server running on: ${chalk.cyan(`http://localhost:${PORT}`)}`
     )
   );
 });

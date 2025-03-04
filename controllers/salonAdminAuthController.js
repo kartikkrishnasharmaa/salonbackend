@@ -1,8 +1,49 @@
 const jwt = require("jsonwebtoken");
 const Branch = require("../models/branch");
+const SuperAdmin = require("../models/superAdminAuth");
 const SalonAdmin = require("../models/salonAdminAuth");
+const Employee = require("../models/employee");
 const { validationResult } = require("express-validator"); // For input validation
-                                                            
+
+
+exports.createSalonEmployee=async(req,res)=>{
+
+  try {
+    const { name, email, phone, password, role, branchId } = req.body;
+    if (!name || !email || !phone || !password || !role) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!["manager", "staff", "receptionist"].includes(role)) {
+      console.log("Invalid Role Received:", role); // Debugging Step
+      return res.status(400).json({ message: "Invalid role provided" });
+    }
+
+    // पहले से मौजूद email check करें
+    const existingEmployee = await Employee.findOne({ email });
+    if (existingEmployee) {
+        return res.status(400).json({ message: "Employee with this email already exists" });
+    }
+
+    // नया Employee बनाएँ
+    const newEmployee = new Employee({
+        name,
+        email,
+        phone,
+        password,
+        role,
+        salonId: req.user._id, // Salon Admin का ID
+        branchId: branchId || null, // अगर branch ID दी गई है तो ही जोड़ें
+    });
+
+    await newEmployee.save();
+    res.status(201).json({ message: "Employee created successfully", employee: newEmployee });
+
+} catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+}
+};
+
 // Function to get salon branches for a specific admin
 exports.getSalonBranches = async (req, res) => {
   try {
@@ -79,26 +120,36 @@ exports.createSalonAdmin = async (req, res) => {
 // Log in as Salon Admin (SuperAdmin logs in as salon admin)
 exports.loginasSalonAdmin = async (req, res) => {
   try {
-    const { salonAdminId } = req.params;
-    const salonAdmin = await SalonAdmin.findById(salonAdminId).select("-password");
+    // 🟢 1. Super Admin Verify Karein
+    if (!req.user || req.user.role !== "superAdmin") {
+      return res.status(403).json({ message: "Access denied! Only SuperAdmin can perform this action" });
+    }
 
+    const { salonAdminId } = req.params;
+    console.log("Salon Admin ID:", salonAdminId);
+
+    // 🟢 2. Salon Admin Find Karein
+    const salonAdmin = await SalonAdmin.findById(salonAdminId).select("-password");
     if (!salonAdmin) {
       return res.status(404).json({ message: "Salon Admin not found" });
     }
 
-    // Generate JWT token for the salon admin
-    const token = jwt.sign(
+    // 🟢 3. New Token Generate Karein for Salon Admin
+    const salonAdminToken = jwt.sign(
       { userId: salonAdmin._id, role: "salonadmin" },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
+    // 🟢 4. Response Return Karein with New Token
     res.status(200).json({
-      token,
+      token: salonAdminToken,
       user: salonAdmin,
       message: `Successfully logged in as ${salonAdmin.salonName}`,
     });
+
   } catch (error) {
+    console.error("Error in Super Admin Direct Login:", error.message);
     res.status(500).json({ message: "Error logging in as Salon Admin", error: error.message });
   }
 };
@@ -169,7 +220,7 @@ exports.salonAdminLogin = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ salonAdminId: salonAdmin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ salonAdminId: salonAdmin._id,role: salonAdmin.role, }, process.env.JWT_SECRET, { expiresIn: '9h' });
 
     res.status(200).json({
       message: "Login successful",

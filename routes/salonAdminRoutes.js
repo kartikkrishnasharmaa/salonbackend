@@ -13,7 +13,7 @@ const {
   getAllSalonAdminsWithBranches
 } = require("../controllers/salonAdminAuthController");
 
-const {authMiddleware,loginasadmin,isSuperAdmin} = require("../middleware/authMiddleware");
+const {authMiddleware,loginasadmin,isSuperAdmin, isSalonAdmin} = require("../middleware/authMiddleware");
 
 
 const router = express.Router();
@@ -21,9 +21,9 @@ const router = express.Router();
 // Route to create a salon admin (Only super admin can do this)
 router.post("/create-salon-admin", authMiddleware,isSuperAdmin, createSalonAdmin);
 
-// router.post("/login-as-salon-admin/:salonAdminId", loginasadmin, loginasSalonAdmin);
+router.post("/direct-login-salon-admin/:salonAdminId",authMiddleware,isSuperAdmin, loginasSalonAdmin);
 
-// router.get("/salon-admin-profile", authMiddleware, getSalonAdminProfile);
+router.get("/salon-admin-profile", authMiddleware, getSalonAdminProfile);
 
 router.post("/create-branch", authMiddleware,isSuperAdmin, createBranch); 
 router.get("/get-all-branches", authMiddleware,isSuperAdmin, getAllSalonAdminsWithBranches);
@@ -43,7 +43,7 @@ router.get("/view-all-salon-admins", authMiddleware,isSuperAdmin, viewAllSalonAd
 router.get("/view-salon-admin/:adminId", authMiddleware,isSuperAdmin, viewSalonAdmin);
 
 // // Update Salon Admin
-// router.put('/update-salon-admin/:id',authMiddleware, updateSalonAdmin);
+router.put('/update-salon-admin/:id',authMiddleware,isSuperAdmin, updateSalonAdmin);
 
 // Delete Salon Admin
 router.delete('/delete-salon-admin/:id',authMiddleware,isSuperAdmin, deleteSalonAdmin);

@@ -5,7 +5,7 @@ const EmployeeSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ["manager", "staff", "receptionist"], required: true },
+  role: { type: String, enum: ["staff","manager", "receptionist"], required: true },
   salonId: { type: mongoose.Schema.Types.ObjectId, ref: "SalonAdmin", required: true },
   branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch",}, // Updated
 });
