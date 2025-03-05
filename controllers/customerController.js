@@ -86,11 +86,30 @@ exports.getSalonallCustomers = async (req, res) => {
     const salonId = req.user._id; // ✅ Fetch Salon Admin's ID
 
     // ✅ Fetch all customers for this salon
-    const customers = await Customer.find({ salonId });
+    const customers = await Customer.find({ salonId,...req.branchFilter });
 
     res.status(200).json({
       message: "Customers fetched successfully",
       customers,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+exports.getCustomerCountByBranch = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== "salonadmin") {
+      return res.status(403).json({ message: "Access denied! Only Salon Admins can access this data" });
+    }
+
+    const salonId = req.user._id;
+    const customerCount = await Customer.countDocuments({ salonId, ...req.branchFilter });
+
+    res.status(200).json({
+      message: "Customer count fetched successfully",
+      count: customerCount, // ✅ Ensure this field is returned
     });
 
   } catch (error) {

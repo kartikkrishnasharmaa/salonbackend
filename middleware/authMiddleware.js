@@ -90,5 +90,13 @@ const authorizeRoles = (...allowedRoles) => {
     next();
   };
 };
+const filterByBranch = (req, res, next) => {
+  if (req.user.role === 'salonadmin' && req.query.branchId) {
+      req.branchFilter = { branchId: req.query.branchId };
+  } else {
+      req.branchFilter = {};
+  }
+  next();
+};
 
-module.exports = { authMiddleware, authorizeRoles, isSuperAdmin, isSalonAdmin };
+module.exports = { authMiddleware, authorizeRoles, isSuperAdmin, isSalonAdmin,filterByBranch };

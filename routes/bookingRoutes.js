@@ -8,4 +8,6 @@ router.post("/create-booking",authMiddleware,isSalonAdmin, createbooking); // Cr
 
 router.get("/get-all-appointments",authMiddleware,isSalonAdmin, getallappointments); // Get all bookings
 
+
+
 module.exports = router;

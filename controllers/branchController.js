@@ -26,7 +26,6 @@ exports.getSalonBranches = async (req, res) => {
   }
 };
 
-
 exports.assignEmployeeToBranch = async (req, res) => {
   try {
     const { employeeId, branchId } = req.body;
@@ -56,4 +55,14 @@ exports.assignEmployeeToBranch = async (req, res) => {
     console.error("❌ Error assigning employee to branch:", error);
     res.status(500).json({ error: "Server error" });
   }
+};
+
+// get all branches by salon admin id for redux main functionality
+exports.getallSalonBranches = async (req, res) => {
+  try {
+    const branches = await Branch.find({ salonAdminId: req.user._id });
+    res.json(branches);
+} catch (error) {
+    res.status(500).json({ message: error.message });
+}
 };
