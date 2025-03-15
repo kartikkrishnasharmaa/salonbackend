@@ -11,7 +11,5 @@ router.post("/customer-self-signup", signupCustomer);
 
 router.get("/salon/customers", authMiddleware, isSalonAdmin,filterByBranch, getSalonallCustomers);
 
-router.get("/salon/customer-count", authMiddleware, isSalonAdmin,filterByBranch, getCustomerCountByBranch);
-
 
 module.exports = router; // ✅ Ensure this is correctly exported

@@ -21,8 +21,8 @@ const customerSchema = new mongoose.Schema(
     },
     createdByModel: {
       type: String,
-      enum: ["Admin", "Manager", "Self"],
-      default: "Self",
+      enum: ["SalonAdmin", "Manager", "Self"],
+      default: "SalonAdmin",
     }, // ✅ Fixed enum
   },
   { timestamps: true } // ✅ Add timestamps (createdAt, updatedAt)

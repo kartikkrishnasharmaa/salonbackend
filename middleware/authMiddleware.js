@@ -17,8 +17,6 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded Token:", decoded); // ✅ Debugging Step
-
     let user;
     switch (decoded.role) {
       case "superAdmin":

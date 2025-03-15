@@ -46,7 +46,27 @@ exports.getAllEmployees = async (req, res) => {
       res.status(500).json({ message: "Server Error", error: error.message });
     }
   };
-
+// fetch all employee by salon id with branch filter
+  exports.getSalonAllEmployees = async (req, res) => {
+    try {
+      if (!req.user || req.user.role !== "salonadmin") {
+        return res.status(403).json({ message: "Access denied! Only Salon Admins can access this data" });
+      }
+      
+      const salonId = req.user._id; // ✅ Fetch Salon Admin's ID
+  
+      // ✅ Fetch all employees for this salon
+      const employees = await Employee.find({ salonId, ...req.branchFilter });
+  
+      res.status(200).json({
+        message: "Employees fetched successfully",
+        employees,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Server Error", error: error.message });
+    }
+  };
+  
 
 exports.assignBranchToEmployee = async (req, res) => {
     try {

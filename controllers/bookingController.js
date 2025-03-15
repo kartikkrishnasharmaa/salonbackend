@@ -1,17 +1,16 @@
 const Appointment = require("../models/appointment");
 
 // Create New Appointment
-exports.createbooking = async (req, res) => {
+exports.createAppointment = async (req, res) => {
   try {
-    const { customerId, branchId, employeeId, service, date, startTime, endTime, notes, price } = req.body;
+    const { customerId, employeeId, service, date, startTime, endTime, notes, price, branchId } = req.body;
 
-    if (!customerId || !branchId || !employeeId || !service || !date || !startTime || !endTime) {
-      return res.status(400).json({ message: "All fields are required!" });
+    if (!branchId) {
+      return res.status(400).json({ message: "Branch ID is required" });
     }
 
     const newAppointment = new Appointment({
       customerId,
-      branchId,
       employeeId,
       service,
       date,
@@ -19,44 +18,29 @@ exports.createbooking = async (req, res) => {
       endTime,
       notes,
       price,
-      status: "Pending",
+      branchId,
     });
 
     await newAppointment.save();
-    res.status(201).json({ message: "Appointment booked successfully!", appointment: newAppointment });
+    res.status(201).json({ message: "Appointment created successfully", appointment: newAppointment });
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error });
+    console.error("Error creating appointment:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
-// Get All Appointments by salon admin and currently branch is is not defined
-exports.getallappointments = async (req, res) => {
+exports.getAppointments = async (req, res) => {
   try {
-    const salonAdminId = req.user._id;
+    const { branchId } = req.query;
+    if (!branchId) return res.status(400).json({ message: "Branch ID required" });
 
-    // ✅ Salon Admin ki branches fetch karna
-    const salonAdmin = await SalonAdmin.findById(salonAdminId);
-    if (!salonAdmin) {
-      return res.status(404).json({ message: "Salon Admin not found" });
-    }
+    const appointments = await Appointment.find({ branchId })
+      .populate("customerId", "name")  // Populate customer name
+      .populate("employeeId", "name")  // Populate employee name
+      .populate("branchId", "name");     // Populate branch name
 
-    // ✅ Branch-wise appointments fetch karna
-    const appointments = await Appointment.find({ branchId: { $in: salonAdmin.branchIds } }) 
-      .populate("customerId employeeId branchId");
-
-    // ✅ Events ko calendar-friendly format me convert karna
-    const formattedAppointments = appointments.map((appt) => ({
-      id: appt._id,
-      title: `${appt.service} - ${appt.customerId.name}`,
-      start: appt.date,
-      end: moment(appt.date).add(1, "hour").toDate(), // 1-hour default duration
-      employee: appt.employeeId ? appt.employeeId.name : "Unassigned",
-      status: appt.status,
-    }));
-
-    res.status(200).json(formattedAppointments);
+    res.status(200).json({ success: true, appointments });
   } catch (error) {
-    console.error("Error Fetching Appointments:", error);
-    res.status(500).json({ message: "Server Error", error });
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 };

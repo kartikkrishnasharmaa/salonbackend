@@ -208,7 +208,8 @@ exports.salonAdminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const salonAdmin = await SalonAdmin.findOne({ email });
+    const salonAdmin = await SalonAdmin.findOne({ email: email.trim().toLowerCase() });
+
 
     if (!salonAdmin) {
       return res.status(400).json({ message: "Salon Admin not found" });
