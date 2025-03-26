@@ -1,24 +1,41 @@
+const mongoose = require("mongoose");
 const Product = require("../models/products");
 const Branch = require("../models/branch");
 
 // 🎯 CREATE PRODUCT - Salon Admin Only
 exports.createProduct = async (req, res) => {
   try {
-    const { branchId, name, category, description, price, stockQuantity, brand } = req.body;
+
+    const {
+      branchId,
+      name,
+      category,
+      description,
+      price,
+      inclusiveTax,
+      mrp,
+      stockQuantity,
+      brand,
+      hsnCode,
+      tax,
+      measurement,
+      isRetail,
+      isConsumable,
+    } = req.body;
 
     // ✅ Validate Required Fields
     if (!branchId || !name || !category || !price || !stockQuantity) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All required fields must be filled" });
     }
 
-    // 🔍 Check if the branch exists & belongs to the salon admin
+    // 🔍 Check if branch exists & belongs to salon admin
     const branch = await Branch.findOne({ _id: branchId, salonAdminId: req.user._id });
     if (!branch) {
       return res.status(404).json({ message: "Branch not found or unauthorized" });
     }
 
     // 🖼️ Extract Image Paths from Multer
-    const imagePaths = req.files.map(file => `/uploads/${file.filename}`); // Public URL format
+    const imagePaths = req.files?.map(file => `/uploads/${file.filename}`) || [];
 
     // 🚀 Create New Product
     const newProduct = new Product({
@@ -26,8 +43,15 @@ exports.createProduct = async (req, res) => {
       category,
       description,
       price,
+      inclusiveTax,
+      mrp,
       stockQuantity,
       brand,
+      hsnCode,
+      tax,
+      measurement,
+      isRetail,
+      isConsumable,
       images: imagePaths,
       salonBranch: branchId,
       createdBy: req.user._id,
@@ -44,21 +68,34 @@ exports.createProduct = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
   try {
-      console.log("Request received for products. User:", req.user);
-      console.log("Branch ID:", req.query.branchId);
+    const { branchId } = req.query;
 
-      if (!req.query.branchId) {
-          return res.status(400).json({ success: false, message: "Branch ID is required" });
-      }
+    // 1. Basic but better validation
+    if (!branchId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Branch ID is required in query params" 
+      });
+    }
 
-      const products = await Product.find({ salonBranch: req.query.branchId });
+    // 2. Fetch products (no ownership check)
+    const products = await Product.find(
+      { salonBranch: branchId },
+      { __v: 0 } // Excludes version key from response
+    );
 
-      console.log("Fetched Products:", products); // ✅ Check what is returned
+    // 3. Simplified success response
+    res.status(200).json({ 
+      success: true,
+      count: products.length, // Helpful for frontend
+      products 
+    });
 
-      res.status(200).json({ success: true, products });
   } catch (error) {
-      console.error("Error fetching products:", error);
-      res.status(500).json({ success: false, message: "Internal server error" });
+    console.error("Fetch Products Error:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to fetch products. Please try again." 
+    });
   }
 };
-

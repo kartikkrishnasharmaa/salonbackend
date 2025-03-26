@@ -4,7 +4,7 @@ const serviceSchema = new mongoose.Schema(
   {
     salonAdminId: { type: mongoose.Schema.Types.ObjectId, ref: "SalonAdmin", required: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
-    category: { type: String, enum: ["Hair", "Skin", "Nails", "Spa", "Makeup"], required: true },
+    category: { type: String, enum: ["Hair", "Skin", "Nails", "Spa", "Makeup","Facial","Massage","Waxing","Manicure","Eyebrow Shaping","Other"], required: true },
     name: { type: String, required: true }, 
     description: { type: String },
     type: { type: String, enum: ["Basic", "Premium", "Luxury"], required: true },
