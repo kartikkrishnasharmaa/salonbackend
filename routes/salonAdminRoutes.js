@@ -13,7 +13,7 @@ const {
   getAllSalonAdminsWithBranches
 } = require("../controllers/salonAdminAuthController");
 
-const {authMiddleware,loginasadmin,isSuperAdmin, isSalonAdmin} = require("../middleware/authMiddleware");
+const {authMiddleware,loginasalonadmin,isSuperAdmin, isSalonAdmin} = require("../middleware/authMiddleware");
 
 
 const router = express.Router();
