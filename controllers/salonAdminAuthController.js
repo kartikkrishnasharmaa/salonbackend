@@ -156,7 +156,20 @@ exports.loginasSalonAdmin = async (req, res) => {
 
 // Middleware for creating a branch (limits to superadmin)
 exports.createBranch = async (req, res) => {
-  const { salonAdminId, branchName, address, phone } = req.body;
+  const { 
+    salonAdminId, 
+    branchName, 
+    address, 
+    phone,
+    businessName,
+    city,
+    state,
+    pincode,
+    area,
+    servicesOffered,
+    hours
+  } = req.body;
+  
   try {
     const salonAdmin = await SalonAdmin.findById(salonAdminId);
     if (!salonAdmin) {
@@ -171,12 +184,19 @@ exports.createBranch = async (req, res) => {
     const newBranch = new Branch({
       salonAdminId,
       branchName,
+      businessName,
       address,
       phone,
+      city,
+      state,
+      pincode,
+      area,
+      servicesOffered,
+      hours
     });
 
     await newBranch.save();
-    res.status(200).json({ message: "Branch created successfully" });
+    res.status(200).json({ message: "Branch created successfully", branch: newBranch });
   } catch (error) {
     res.status(500).json({ message: "Error creating branch", error: error.message });
   }
